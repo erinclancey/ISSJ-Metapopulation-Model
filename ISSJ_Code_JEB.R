@@ -60,21 +60,16 @@ Va_POP<- rep(NA, R)
 
 #### BEGIN ITERATIONS
 
-for (r in 1:R){
-   
+for (r in 1:R){   
    N_pine[r] <- length(c(Z_pine_f[,1], Z_pine_m[,1]))
    N_oak[r] <- length(c(Z_oak_f[,1], Z_oak_m[,1]))
-
    Zbar_pine[r] <- mean(c(Z_pine_f[,2], Z_pine_m[,2]))
    Zbar_oak[r] <- mean(c(Z_oak_f[,2], Z_oak_m[,2]))
-   
    BVbar_pine[r] <- mean(c(Z_pine_f[,1], Z_pine_m[,1]))
    BVbar_oak[r] <- mean(c(Z_oak_f[,1], Z_oak_m[,1]))
-
    Va_pine[r]<-var(c(Z_pine_f[,1], Z_pine_m[,1]))
    Va_oak[r]<-var(c(Z_oak_f[,1], Z_oak_m[,1]))
    Va_POP[r] <- var(c(Z_pine_f[,1], Z_pine_m[,1], Z_oak_f[,1], Z_oak_m[,1]))
-   
    Vp_pine[r]<-var(c(Z_pine_f[,2], Z_pine_m[,2]))
    Vp_pine_f[r]<-var(Z_pine_f[,2])
    Vp_pine_m[r]<-var(Z_pine_m[,2])
@@ -82,13 +77,9 @@ for (r in 1:R){
    Vp_oak_f[r]<-var(Z_oak_f[,2])
    Vp_oak_m[r]<-var(Z_oak_m[,2])
    Vp_POP[r] <- var(c(Z_pine_f[,2], Z_pine_m[,2], Z_oak_f[,2], Z_oak_m[,2]))
-   
    h2[r] <- var(c(Z_pine_f[,1], Z_pine_m[,1], Z_oak_f[,1], Z_oak_m[,1])) / var(c(Z_pine_f[,2], Z_pine_m[,2], Z_oak_f[,2], Z_oak_m[,2]))
 
-
-
 ### MATE AND MAKE OFFSPRING IN PINE
-
    Pairs_pine <- data.frame(FemBV = rep(NA, n_pine), FemZ = rep(NA,n_pine) , MalBV = rep(NA, n_pine), MalZ = rep(NA,n_pine))
    for (i in 1:n_pine){ # pairs breed in pine
       repeat{
@@ -121,7 +112,6 @@ for (r in 1:R){
    Z_pine_f <- rbind(Z_pine_f, Zoff_pine_f)
 
 ### MATE AND MAKE OFFSPRING IN OAK
-   
    Pairs_oak <- data.frame(FemBV = rep(NA, n_oak), FemZ = rep(NA,n_oak) , MalBV = rep(NA, n_oak), MalZ = rep(NA,n_oak))
    for (i in 1:n_oak){
       repeat{
@@ -155,36 +145,26 @@ for (r in 1:R){
    
 
 ### MIGRATION - MIGRATION IS RANDOM IF ETA=0
-
    M_to_pine_f <- Z_oak_f[M_P*exp(-eta*(Z_oak_f[,2] - theta_pine)^2) / ( exp(-eta*(Z_oak_f[,2] - theta_pine)^2) + exp(-eta*(Z_oak_f[,2] - theta_oak)^2)) > runif(length(Z_oak_f[,2]), 0, 1),, drop=FALSE]
-
-
    M_to_pine_m <- Z_oak_m[M_P*exp(-eta*(Z_oak_m[,2] - theta_pine)^2) / ( exp(-eta*(Z_oak_m[,2] - theta_pine)^2) + exp(-eta*(Z_oak_m[,2] - theta_oak)^2)) > runif(length(Z_oak_m[,2]), 0, 1),, drop=FALSE]
-
-
    M_to_oak_f <- Z_pine_f[M_O*exp(-eta*(Z_pine_f[,2] - theta_oak)^2) / ( exp(-eta*(Z_pine_f[,2] - theta_oak)^2) + exp(-eta*(Z_pine_f[,2] - theta_pine)^2)) > runif(length(Z_pine_f[,2]), 0, 1),, drop=FALSE]
-
    M_to_oak_m <- Z_pine_m[M_O *exp(-eta*(Z_pine_m[,2] - theta_oak)^2) / ( exp(-eta*(Z_pine_m[,2] - theta_oak)^2) + exp(-eta*(Z_pine_m[,2] - theta_pine)^2)) > runif(length(Z_pine_m[,2]), 0, 1),, drop=FALSE]
 
 ### REMOVE MIGRANT FROM THEIR NATAL SUBPOPULATION
-   
    Z_pine_f <- cbind(vsetdiff(Z_pine_f[,1], M_to_oak_f[,1]), vsetdiff(Z_pine_f[,2], M_to_oak_f[,2]))
    Z_pine_m <- cbind(vsetdiff(Z_pine_m[,1], M_to_oak_m[,1]), vsetdiff(Z_pine_m[,2], M_to_oak_m[,2]))
    Z_oak_f <- cbind(vsetdiff(Z_oak_f[,1], M_to_pine_f[,1]), vsetdiff(Z_oak_f[,2], M_to_pine_f[,2]))
    Z_oak_m <- cbind(vsetdiff(Z_oak_m[,1], M_to_pine_m[,1]), vsetdiff(Z_oak_m[,2], M_to_pine_m[,2]))
 
-### PINE MALES AND FEMALES AFTER MIGRATION
-   
+### PINE MALES AND FEMALES AFTER MIGRATION  
    Z_pine_f <- rbind(Z_pine_f, M_to_pine_f)
    Z_pine_m <- rbind(Z_pine_m, M_to_pine_m)
 
-### OAK MALES AND FEMALES AFTER MIGRATION
-   
+### OAK MALES AND FEMALES AFTER MIGRATION 
    Z_oak_f <- rbind(Z_oak_f, M_to_oak_f)
    Z_oak_m <- rbind(Z_oak_m, M_to_oak_m)
 
-### ENVOKE SELECTION IN PINE
-   
+### ENVOKE SELECTION IN PINE 
    Z_pine_f <- Z_pine_f[exp(-S*(Z_pine_f[,2] - theta_pine)^2) > runif(length(Z_pine_f[,2]), 0, 1),]
    Z_pine_m <- Z_pine_m[exp(-S*(Z_pine_m[,2] - theta_pine)^2) > runif(length(Z_pine_m[,2]), 0, 1),]
 
@@ -197,7 +177,6 @@ for (r in 1:R){
    }
 
 ### ENVOKE SELECTION IN PINE
-   
    Z_oak_f <- Z_oak_f[exp(-S*(Z_oak_f[,2] - theta_oak)^2) > runif(length(Z_oak_f[,2]), 0, 1),]
    Z_oak_m <- Z_oak_m[exp(-S*(Z_oak_m[,2] - theta_oak)^2) > runif(length(Z_oak_m[,2]), 0, 1),]
 
