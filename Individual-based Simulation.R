@@ -1,25 +1,35 @@
+# Initial Setup
 library(vecsets)
+library(tidyverse)
+library(cowplot)
+library(grid)
+library(gridExtra)
+library(latex2exp)
+set.seed(420)
 
-N_P = 216
-N_O = 1587
-a = 0.1 # strength of mate preference
-d = 2.06 # match offset
-gamma = 1 # max. prob. of mating
+
+# Set Parameter Values
+# Current parameter values correspond to Figure 6 in the Manuscript
+
+H_P = 0.12 # percent pine habitat
+H_O = 0.88 # percent oak habitat
+N_P = 216 # carrying capacity in pine
+N_O = 1587 # carrying capacity in oak
+alpha = 0.1 # strength of mate preference 
+delta = 2.06 # optimal mate offset match 
 n_pine = 62 # number of nesting sites in pine
 n_oak = 453 # number of nesting sites in oak
-SDa = SDa # additive genetic standard deviation
-SDe = SDe # environmental standard deviation
-SDs = SDs # segregational standard deviation
-sex = 1 # fixed sex effect
-eta = eta # strength of habitat preference
+SDa = 1.474 # additive genetic standard deviation
+SDe = 0.876 # environmental standard deviation
+SDs = 0.870 # segregational standard deviation
+sex = 1 # genetic factor causing sexual dimorphism
+eta = 0.198 # strength of habitat preference
 m = 0.25 # max prob of migration
-H_P = 0.12 # proportion of pine habitat
-H_O = 0.88 # proportion of oak habitat
-theta_pine = theta_pine # ecological optimum in pine
-theta_oak = theta_oak # ecological optimum in oak
-S = S # strength of selection
+theta_pine = 24.943 # ecological optimum in pine
+theta_oak = 23.679 # ecological optimum in oak
+gamma = 0.009 # strength of selection
 
-############# Initialize population
+# Initialize population
 start=mean(c(theta_oak, theta_pine))
 BV_pine_f <- rnorm(N_P/2, mean = start, sd = SDa)
 BV_pine_m <- rnorm(N_P/2, mean = start, sd = SDa)
@@ -35,7 +45,7 @@ colnames(Z_oak_f) = NULL
 Z_oak_m <- as.matrix(cbind(BV_oak_m, rnorm(N_O/2, mean = BV_oak_m+sex, sd = SDe)))
 colnames(Z_oak_m) = NULL
 
-R=300 # number of generations
+R=300 # Number of generations
 Zbar_pine <- rep(NA, R)
 Zbar_oak <- rep(NA, R)
 deltaZbar <- rep(NA, R)
@@ -55,7 +65,6 @@ BVbar_oak <- rep(NA, R)
 Vp_POP<- rep(NA, R)
 Va_POP<- rep(NA, R)
 
-############ Run Simulations
 for (r in 1:R){
    
    N_pine[r] <- length(c(Z_pine_f[,1], Z_pine_m[,1]))
@@ -84,12 +93,13 @@ for (r in 1:R){
 
 
 #### Mate and make offspring in Pine
+
    Pairs_pine <- data.frame(FemBV = rep(NA, n_pine), FemZ = rep(NA,n_pine) , MalBV = rep(NA, n_pine), MalZ = rep(NA,n_pine))
    for (i in 1:n_pine){ # pairs breed in pine
       repeat{
          Pfem <- Z_pine_f[sample(nrow(Z_pine_f),size=1,replace=TRUE),, drop=FALSE]
          Pmal <- Z_pine_m[sample(nrow(Z_pine_m),size=1,replace=TRUE),, drop=FALSE]
-         mate <- gamma*exp(-a*(Pmal[,2] - Pfem[,2] - d)^2)
+         mate <- exp(-alpha*(Pmal[,2] - Pfem[,2] - delta)^2)
          if (mate > runif(1)){
             pair <- cbind(Pfem, Pmal)
             Pairs_pine[i,] <- pair
@@ -105,6 +115,7 @@ for (r in 1:R){
    Z_off_pine <- BV_off_pine + rnorm(length(BV_off_pine), 0, SDe)
    sex_off_pine <- sample(c("M","F"), length(BV_off_pine), replace=TRUE)
    
+   
    Zoff_pineMatrix <- as.matrix(cbind(BV_off_pine, Z_off_pine, sex_off_pine))
    colnames(Zoff_pineMatrix) = NULL
    
@@ -114,17 +125,20 @@ for (r in 1:R){
    Zoff_pine_f <- cbind(as.numeric(Zoff_pine_f[,1]), as.numeric(Zoff_pine_f[,2]) - sex)
    Zoff_pine_m <- cbind(as.numeric(Zoff_pine_m[,1]), as.numeric(Zoff_pine_m[,2]) + sex)
 
+   
    Z_pine_m <- rbind(Z_pine_m, Zoff_pine_m)
    Z_pine_f <- rbind(Z_pine_f, Zoff_pine_f)
 
 
-#### Mate and make offspring in Oak
+
+   #### Mate and make offspring in Oak
+
    Pairs_oak <- data.frame(FemBV = rep(NA, n_oak), FemZ = rep(NA,n_oak) , MalBV = rep(NA, n_oak), MalZ = rep(NA,n_oak))
    for (i in 1:n_oak){ # K pairs breed in oak
       repeat{
          Pfem <- Z_oak_f[sample(nrow(Z_oak_f),size=1,replace=TRUE),, drop=FALSE]
          Pmal <- Z_oak_m[sample(nrow(Z_oak_m),size=1,replace=TRUE),, drop=FALSE]
-         mate <- gamma*exp(-a*(Pmal[,2] - Pfem[,2] - d)^2)
+         mate <- exp(-alpha*(Pmal[,2] - Pfem[,2] - delta)^2)
          if (mate > runif(1)){
             pair <- cbind(Pfem, Pmal)
             Pairs_oak[i,] <- pair
@@ -139,6 +153,8 @@ for (r in 1:R){
    Z_off_oak <- BV_off_oak + rnorm(length(BV_off_oak), 0, SDe)
    sex_off_oak <- sample(c("M","F"), length(BV_off_oak), replace=TRUE)
    
+   
+   
    Zoff_oakMatrix <- as.matrix(cbind(BV_off_oak, Z_off_oak, sex_off_oak))
    colnames(Zoff_oakMatrix) = NULL
    
@@ -148,23 +164,33 @@ for (r in 1:R){
    Zoff_oak_f <- cbind(as.numeric(Zoff_oak_f[,1]), as.numeric(Zoff_oak_f[,2]) - sex)
    Zoff_oak_m <- cbind(as.numeric(Zoff_oak_m[,1]), as.numeric(Zoff_oak_m[,2]) + sex)
    
+   
    Z_oak_m <- rbind(Z_oak_m, Zoff_oak_m)
    Z_oak_f <- rbind(Z_oak_f, Zoff_oak_f)
    
 
-##### Dispersal
+   
+
+   ##### Migration
+
    M_to_pine_f <- Z_oak_f[2*m*H_P*exp(-eta*(Z_oak_f[,2] - theta_pine)^2) / ( exp(-eta*(Z_oak_f[,2] - theta_pine)^2) + exp(-eta*(Z_oak_f[,2] - theta_oak)^2)) > runif(length(Z_oak_f[,2]), 0, 1),, drop=FALSE]
+
+
    M_to_pine_m <- Z_oak_m[2*m*H_P*exp(-eta*(Z_oak_m[,2] - theta_pine)^2) / ( exp(-eta*(Z_oak_m[,2] - theta_pine)^2) + exp(-eta*(Z_oak_m[,2] - theta_oak)^2)) > runif(length(Z_oak_m[,2]), 0, 1),, drop=FALSE]
 
+
    M_to_oak_f <- Z_pine_f[2*m*H_O*exp(-eta*(Z_pine_f[,2] - theta_oak)^2) / ( exp(-eta*(Z_pine_f[,2] - theta_oak)^2) + exp(-eta*(Z_pine_f[,2] - theta_pine)^2)) > runif(length(Z_pine_f[,2]), 0, 1),, drop=FALSE]
+
    M_to_oak_m <- Z_pine_m[2*m*H_O *exp(-eta*(Z_pine_m[,2] - theta_oak)^2) / ( exp(-eta*(Z_pine_m[,2] - theta_oak)^2) + exp(-eta*(Z_pine_m[,2] - theta_pine)^2)) > runif(length(Z_pine_m[,2]), 0, 1),, drop=FALSE]
 
 
    # Remove migrants from each population
    Z_pine_f <- cbind(vsetdiff(Z_pine_f[,1], M_to_oak_f[,1]), vsetdiff(Z_pine_f[,2], M_to_oak_f[,2]))
+
    Z_pine_m <- cbind(vsetdiff(Z_pine_m[,1], M_to_oak_m[,1]), vsetdiff(Z_pine_m[,2], M_to_oak_m[,2]))
 
    Z_oak_f <- cbind(vsetdiff(Z_oak_f[,1], M_to_pine_f[,1]), vsetdiff(Z_oak_f[,2], M_to_pine_f[,2]))
+
    Z_oak_m <- cbind(vsetdiff(Z_oak_m[,1], M_to_pine_m[,1]), vsetdiff(Z_oak_m[,2], M_to_pine_m[,2]))
 
    ## Pine after migration
@@ -176,11 +202,14 @@ for (r in 1:R){
    Z_oak_m <- rbind(Z_oak_m, M_to_oak_m)
 
 
-##### Selection in Pine
-   Z_pine_f <- Z_pine_f[exp(-S*(Z_pine_f[,2] - theta_pine)^2) > runif(length(Z_pine_f[,2]), 0, 1),]
-   Z_pine_m <- Z_pine_m[exp(-S*(Z_pine_m[,2] - theta_pine)^2) > runif(length(Z_pine_m[,2]), 0, 1),]
+   ##### Selection in Pine
+   
+   Z_pine_f <- Z_pine_f[exp(-gamma*(Z_pine_f[,2] - theta_pine)^2) > runif(length(Z_pine_f[,2]), 0, 1),]
+   Z_pine_m <- Z_pine_m[exp(-gamma*(Z_pine_m[,2] - theta_pine)^2) > runif(length(Z_pine_m[,2]), 0, 1),]
 
-#### Density-dependent mortality in pine
+
+   # I am avoiding demographic stochasticity by doing the following
+
    if (length(Z_pine_f[,2]) > N_P/2){
       Z_pine_f <- Z_pine_f[sample(nrow(Z_pine_f), N_P/2, replace=FALSE),]
    }
@@ -189,11 +218,12 @@ for (r in 1:R){
       Z_pine_m <- Z_pine_m[sample(nrow(Z_pine_m), N_P/2, replace=FALSE),]
    }
 
-###### Selection in Oak
-   Z_oak_f <- Z_oak_f[exp(-S*(Z_oak_f[,2] - theta_oak)^2) > runif(length(Z_oak_f[,2]), 0, 1),]
-   Z_oak_m <- Z_oak_m[exp(-S*(Z_oak_m[,2] - theta_oak)^2) > runif(length(Z_oak_m[,2]), 0, 1),]
+   ###### Selection in Oak
+   
+   Z_oak_f <- Z_oak_f[exp(-gamma*(Z_oak_f[,2] - theta_oak)^2) > runif(length(Z_oak_f[,2]), 0, 1),]
+   Z_oak_m <- Z_oak_m[exp(-gamma*(Z_oak_m[,2] - theta_oak)^2) > runif(length(Z_oak_m[,2]), 0, 1),]
 
-#### Density-dependent mortality in oak
+
 if (length(Z_oak_f[,2]) > N_O/2){
    Z_oak_f <- Z_oak_f[sample(nrow(Z_oak_f), N_O/2, replace=FALSE),]
 }
@@ -204,3 +234,48 @@ if (length(Z_oak_m[,2]) > N_O/2){
    print(r)
 }
 
+#####Make Plots
+
+Gen <- seq(1,R, 1)
+Zbar <- data.frame(cbind(Zbar_oak, Zbar_pine, Gen ))
+
+colors <- c("Zbar_pine" = "skyblue4", "Zbar_oak" = "tomato3")
+p <- ggplot(Zbar, aes(x = Gen)) + theme_minimal()+ ggtitle("A")+ theme(axis.title.x = element_blank())+ theme(text = element_text(size = 12)) 
+p <- p + annotate("rect", xmin = -Inf, xmax = Inf,ymin = 23.83731-0.1521281, ymax = 23.83731+0.1521281, alpha = .15) + annotate("rect", xmin = -Inf, xmax = Inf,ymin = 24.61484-0.237446, ymax = 24.61484+0.237446, alpha = .15)
+p <- p + geom_line(aes(y = Zbar_pine, color="Zbar_pine"))
+p <- p + geom_line(aes(y = Zbar_oak, color="Zbar_oak")) + labs(color = "") + scale_color_manual(values = colors, labels = c("Pine", "Oak"))
+p <- p + geom_hline(yintercept = 24.61484, color="skyblue4", linetype=2)
+p <- p + geom_hline(yintercept = 23.83731, color="tomato3", linetype=2)
+p <- p + geom_hline(yintercept = theta_pine, linetype = 3, color="skyblue4")
+p <- p + geom_hline(yintercept = theta_oak, linetype = 3, color="tomato3")
+p <- p + scale_x_continuous() + scale_y_continuous(name = TeX("$\\bar{z}$"), breaks = seq(18,32,0.5), limits = c(23, 26))
+plot(p)
+
+v <- ggplot(data.frame(Gen,Vp_pine), x=Gen, y=Vp_pine) + theme_minimal() + ggtitle("B") + theme(axis.title.x = element_blank())+ theme(text = element_text(size = 12)) 
+v <- v + annotate("rect", xmin = -Inf, xmax = Inf, ymin = 1.422045^2, ymax = 1.759975^2, alpha = .15)
+v <- v + geom_line(aes(x=Gen, y=Vp_pine), color="skyblue4", size=0.25)
+v <- v + geom_hline(yintercept = 2.474181, color="skyblue4", linetype=2)
+v <- v + scale_x_continuous() + scale_y_continuous(name = TeX("$\\hat{V}(z)$"), breaks = seq(1.0,4.0,0.5), limits = c(1.0, 4.0))
+plot(v)
+
+v2 <- ggplot(data.frame(Gen,Vp_oak), x=Gen, y=Vp_oak) + theme_minimal()+ theme(text = element_text(size = 12)) 
+v2 <- v2 + theme(axis.text.y = element_blank(), axis.title = element_blank())
+v2 <- v2 + annotate("rect", xmin = -Inf, xmax = Inf, ymin = 1.424401^2, ymax = 1.640820^2, alpha = .15)
+v2 <- v2 + geom_line(aes(x=Gen, y=Vp_pine), color="tomato3", size=0.25)+ ggtitle("C")
+v2 <- v2 + geom_hline(yintercept = 2.32538, color="tomato3", linetype=2)
+v2 <- v2 + scale_x_continuous() + scale_y_continuous(breaks = seq(1.0,4.0,0.5), limits = c(1.0, 4.0))
+plot(v2)
+
+h <- ggplot(data.frame(Gen,h2), x=Gen, y=h2) + theme_minimal() + ggtitle("D") + theme(axis.title.x = element_blank())+ theme(text = element_text(size = 12))
+h <- h + annotate("rect", xmin = -Inf, xmax = Inf, ymin = 0.59-0.098, ymax = 0.59+0.098, alpha = .15)
+h <- h + geom_line(aes(x=Gen, y=h2, color="h2"))+ labs(color = "") + scale_color_manual(values = "black", labels = c("Total Pop."))
+h <- h + geom_hline(yintercept = 0.59, color="black", linetype=2)
+h <- h + scale_x_continuous() + scale_y_continuous(name = TeX("$h^2$"), breaks = seq(0, 1, 0.2), limits = c(0, 1))
+plot(h)
+
+vplot <- plot_grid(v,v2, ncol = 2, nrow = 1 )
+plot(vplot)
+
+x.grob <- textGrob("Generation", gp=gpar(fontsize=13))
+plot <- plot_grid(p, vplot, h, ncol = 1, nrow = 3, rel_heights=c(2,1,1))
+grid.arrange(arrangeGrob(plot, bottom = x.grob))
