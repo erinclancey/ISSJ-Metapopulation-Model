@@ -197,7 +197,7 @@ calcLogLik <- function(eta, theta_oak, theta_pine, gamma,SDa, SDe, SDs,m, summar
     loglik <- sum(dnorm(Z_P_M, summary[[1]], summary[[2]], log = TRUE)) + 
       sum(dnorm(Z_P_F, summary[[3]], summary[[4]], log = TRUE)) +
       sum(dnorm(Z_O_M, summary[[5]], summary[[6]], log = TRUE)) +
-      sum(dnorm(Z_O_F, summary[[7]], summary[[8]], log = TRUE)) + dgamma(m, shape=9.4, scale=0.01) 
+      sum(dnorm(Z_O_F, summary[[7]], summary[[8]], log = TRUE)) + dgamma(m, shape=9.4, scale=0.01, log=TRUE) 
   }
   return(loglik)
 }
