@@ -92,18 +92,17 @@ p <- ggplot(processed.long, aes(x = value)) + theme_minimal()+
 plot(p)
 
 p <- ggplot(processed, aes(x=gamma, y=eta)) + 
-  geom_hex(bins = 80, aes(fill=..count..)) +
+  geom_hex(bins = 50, aes(fill=..count..)) +
   geom_point(alpha = 0, show.legend=FALSE) +
   scale_fill_continuous(type = "viridis") +
   xlab(expression(paste("Ecological Selection ", (gamma)))) +  
-  ylab(expression(paste("Habitat Preference", (eta)))) +
+  ylab(expression(paste("Habitat Preference",  (eta)))) +
   labs(fill='Count')+
   theme(plot.title = element_text(hjust = 0.5), 
-        legend.position = c(0.9, 0.70),
-        legend.background = element_rect(fill = "white",size=0.1, linetype="solid", 
-                                         colour ="white"),
-        panel.background = element_rect(size=0.1, 
-                                        linetype="solid", color="white"))
-ggMarginal(p,data = processed, x=gamma, y=eta, type =  "histogram", color='black',margins = "both", size = 5)
+        legend.position = c(0.95, 0.80),
+        legend.background = element_rect(fill = "gainsboro",size=0.1, linetype="solid", colour ="white"),
+        panel.background = element_rect(size=0.1, linetype="solid", color="white"))+
+  scale_x_continuous(limits=c(0, 0.25)) + scale_y_continuous(breaks=seq(0,0.3,0.05))
+ggMarginal(p,data = processed, x=gamma, y=eta, type =  "histogram", color='black',margins = "both", size = 5, alpha=1)
 
 
