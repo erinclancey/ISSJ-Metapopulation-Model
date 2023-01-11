@@ -30,15 +30,19 @@ chain5 <- read.csv("Results_New_4.csv", header=TRUE)
 colnames(chain5) <- c("iter","eta", "theta_oak", "theta_pine", "gamma", "SDa", "SDe", "SDs", "m", "loglik")
 chain5$chain <- rep("chain_5", length(chain5$iter))
 
+chain6 <- read.csv("Results_New_5.csv", header=TRUE)
+colnames(chain6) <- c("iter","eta", "theta_oak", "theta_pine", "gamma", "SDa", "SDe", "SDs", "m", "loglik")
+chain6$chain <- rep("chain_6", length(chain5$iter))
 
 
-chains <- rbind(chain1,chain2,chain3,chain4,chain5)
+
+chains <- rbind(chain1,chain2,chain3,chain4,chain5,chain6)
 chains.long <- melt(chains, id=c("chain", "iter"))
 
 #plot the three unprocessed pmcmc chains
 p <- ggplot(chains.long, aes(x = iter, y = value, group=chain)) + 
   geom_line(aes(color=chain)) +  theme_minimal()+
-  scale_color_manual(values = c("#00AFBB", "#E7B800", "#999999", "red", "blue"))+ 
+  scale_color_manual(values = c("#00AFBB", "#E7B800", "#999999", "red", "blue", "pink"))+ 
   facet_wrap(vars(variable), scales='free',   ncol = 3)
 plot(p)
 
@@ -49,7 +53,8 @@ mcmc.chain2 <- mcmc(chain2[,-11])
 mcmc.chain3 <- mcmc(chain3[,-11])
 mcmc.chain4 <- mcmc(chain4[,-11])
 mcmc.chain5 <- mcmc(chain5[,-11])
-post.list <- list(mcmc.chain1,mcmc.chain2,mcmc.chain3,mcmc.chain4,mcmc.chain5)
+mcmc.chain6 <- mcmc(chain6[,-11])
+post.list <- list(mcmc.chain1,mcmc.chain2,mcmc.chain3,mcmc.chain4,mcmc.chain5,mcmc.chain6)
 mcmc.list <- mcmc.list(post.list)
 raftery.diag(mcmc.list, q=0.025, r=0.005, s=0.95, converge.eps=0.001)
 autocorr(mcmc.list, lags = c(0, 1, 5, 10, 50), relative=TRUE)
@@ -57,7 +62,7 @@ autocorr.plot(mcmc.list, lag.max=500, auto.layout = TRUE)
 
 gelman.diag(mcmc.list, confidence = 0.95, transform=FALSE, autoburnin=TRUE,multivariate=TRUE)
 
-processed <- window(mcmc.list, start=100, end=1000, thin=10)
+processed <- window(mcmc.list, start=500, end=60000, thin=500)
 processed <- data.frame(do.call(rbind, processed))
 
 ci(processed$eta, ci=0.95, method = "ETI")
@@ -92,7 +97,7 @@ p <- ggplot(processed.long, aes(x = value)) + theme_minimal()+
 plot(p)
 
 p <- ggplot(processed, aes(x=gamma, y=eta)) + 
-  geom_hex(bins = 50, aes(fill=..count..)) +
+  geom_hex(bins = 10, aes(fill=..count..)) +
   geom_point(alpha = 0, show.legend=FALSE) +
   scale_fill_continuous(type = "viridis") +
   xlab(expression(paste("Ecological Selection ", (gamma)))) +  
@@ -102,7 +107,32 @@ p <- ggplot(processed, aes(x=gamma, y=eta)) +
         legend.position = c(0.95, 0.80),
         legend.background = element_rect(fill = "gainsboro",size=0.1, linetype="solid", colour ="white"),
         panel.background = element_rect(size=0.1, linetype="solid", color="white"))+
-  scale_x_continuous(limits=c(0, 0.25)) + scale_y_continuous(breaks=seq(0,0.3,0.05))
+  scale_x_continuous(limits=c(0, 0.1)) + scale_y_continuous(breaks=seq(0,0.3,0.05))
+ggMarginal(p,data = processed, x=gamma, y=eta, type =  "histogram", color='black',margins = "both", size = 5, alpha=1)
+
+p <- ggplot(processed, aes(x=gamma, y=eta))+
+  geom_density_2d(size=1,aes(color = ..level..), show.legend=TRUE)+scale_color_viridis_c(name = "Density")+
+  geom_point(alpha = 1, size=0.5,show.legend=FALSE) +
+  xlab(expression(paste("Ecological Selection ", (gamma)))) +  
+  ylab(expression(paste("Habitat Preference",  (eta)))) +
+  theme(plot.title = element_text(hjust = 0.5), 
+        legend.position = c(0.95, 0.80),
+        legend.background = element_rect(fill = "gainsboro",size=0.1, linetype="solid", colour ="white"),
+        panel.background = element_rect(size=0.1, linetype="solid", color="white"))+
+  scale_x_continuous(limits=c(0, 0.1)) + scale_y_continuous(breaks=seq(0,0.3,0.05))
 ggMarginal(p,data = processed, x=gamma, y=eta, type =  "histogram", color='black',margins = "both", size = 5, alpha=1)
 
 
+p <- ggplot(processed, aes(x=gamma, y=eta))+
+  geom_density_2d_filled(show.legend = TRUE, alpha=0.75)+ 
+  geom_density_2d(colour="black")+
+  geom_point(alpha = 0,size=0.5, show.legend=FALSE) +theme_minimal()+
+  xlab(expression(paste("Ecological Selection ", (gamma)))) +  
+  ylab(expression(paste("Habitat Preference",  (eta)))) +
+  theme(plot.title = element_text(hjust = 0.5), 
+        legend.position = c(0.85, 0.50),
+        legend.background = element_rect(fill = "gainsboro",size=0.1, linetype="solid", colour ="white"),
+        panel.background = element_rect(size=0.1, linetype="solid", color="white"))+
+  guides(fill = guide_legend(title = "Density"))+
+  scale_x_continuous(limits=c(0, 0.1)) + scale_y_continuous(breaks=seq(0,0.3,0.05))
+ggMarginal(p,data = processed, x=gamma, y=eta, type =  "histogram", color='black',margins = "both", size = 5, alpha=1)
