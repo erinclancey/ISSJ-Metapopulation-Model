@@ -339,6 +339,6 @@ SDs=0.6594796
 m=0.084
 
 
-results <- Metro_Hast(eta, theta_oak, theta_pine, gamma, SDe, SDs, m, iter=5, Z_P_M, Z_P_F, Z_O_M, Z_O_F)
+results <- Metro_Hast(eta, theta_oak, theta_pine, gamma, SDe, SDs, m, iter=30000, Z_P_M, Z_P_F, Z_O_M, Z_O_F)
 results.post <- do.call(cbind, results)
 
