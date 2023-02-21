@@ -112,4 +112,4 @@ alphamle <- function(dlst, start = NA) {
 
 # Read the results output
 mle <- alphamle(Jaydata)
-mle
+
