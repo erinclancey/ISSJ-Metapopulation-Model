@@ -18,7 +18,7 @@ process <- function(eta, theta_oak, theta_pine, gamma, SDe, SDs, m){
   SDa=1
   H_P = 0.12
   H_O = 0.88
-  start = mean(theta_oak, theta_pine)
+  start = theta_oak
   
   BV_pine_f <- rnorm(N_P/2, mean = start, sd = SDa)
   BV_pine_m <- rnorm(N_P/2, mean = start, sd = SDa)
