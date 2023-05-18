@@ -27,7 +27,7 @@ process <- function(eta, theta_oak, theta_pine, gamma, SDe, SDs, m){
   SDa=1.0
   H_P = 0.12
   H_O = 0.88
-  start = mean(theta_oak, theta_pine)
+  start = theta_oak
   
   BV_pine_f <- rnorm(N_P/2, mean = start, sd = SDa)
   BV_pine_m <- rnorm(N_P/2, mean = start, sd = SDa)
@@ -43,7 +43,6 @@ process <- function(eta, theta_oak, theta_pine, gamma, SDe, SDs, m){
   Z_oak_m <- as.matrix(cbind(BV_oak_m, rnorm(N_O/2, mean = BV_oak_m+sex, sd = SDe)))
   colnames(Z_oak_m) = NULL
   
-  
   R=1000
   Zbar_pine_M <- rep(NA, R)
   Zbar_pine_F <- rep(NA, R)
@@ -53,7 +52,6 @@ process <- function(eta, theta_oak, theta_pine, gamma, SDe, SDs, m){
   SDp_pine_F <-rep(NA, R)
   SDp_oak_M <-rep(NA, R)
   SDp_oak_F <-rep(NA, R)
-  
   
   for (r in 1:R){
     Zbar_pine_M[r] <- mean(Z_pine_m[,2])
@@ -97,7 +95,6 @@ process <- function(eta, theta_oak, theta_pine, gamma, SDe, SDs, m){
     
     Z_pine_m <- rbind(Z_pine_m, Zoff_pine_m)
     Z_pine_f <- rbind(Z_pine_f, Zoff_pine_f)
-    
     
     #### Mate and make offspring in Oak
     Pairs_oak <- data.frame(FemBV = rep(NA, n_oak), FemZ = rep(NA,n_oak) , MalBV = rep(NA, n_oak), MalZ = rep(NA,n_oak))
@@ -328,7 +325,6 @@ prop.sd <- 0.193*matrix(c(0.000206881,-0.000479629,-0.000546419,-2.28E-05,-0.000
   return(list(eta, theta_oak, theta_pine, gamma, SDe, SDs, m, lik, accept))
 }
 
-
 #starting generated values from pilot runs
 eta=0.1716631
 theta_oak=23.6521
@@ -337,7 +333,6 @@ gamma=0.006560123
 SDe=0.7925147
 SDs=0.6594796
 m=0.084
-
 
 results <- Metro_Hast(eta, theta_oak, theta_pine, gamma, SDe, SDs, m, iter=30000, Z_P_M, Z_P_F, Z_O_M, Z_O_F)
 results.post <- do.call(cbind, results)
