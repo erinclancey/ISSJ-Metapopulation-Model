@@ -15,7 +15,8 @@ Z_P_F <- subset(ISSJ_phenotypes, Habitat=="Pine" & Sex=="F")$Ave_Nares_mm
 Z_O_M <- subset(ISSJ_phenotypes, Habitat=="Oak" & Sex=="M")$Ave_Nares_mm
 Z_O_F <- subset(ISSJ_phenotypes, Habitat=="Oak" & Sex=="F")$Ave_Nares_mm
 
-#Simulate the life cycle, make simulated data and calculate means and SD's
+# Simulate the life cycle, make simulated data and calculate means and SD's
+# Additive genetic variance (SDa), environmental variance (SDe), and segregational variance (SDs) are handled as standard deviations in the code below
 process <- function(eta, theta_oak, theta_pine, gamma, SDe, SDs, m){
   N_P = 216
   N_O = 1587
@@ -24,7 +25,7 @@ process <- function(eta, theta_oak, theta_pine, gamma, SDe, SDs, m){
   n_pine = 62
   n_oak = 453
   sex = 1
-  SDa=1.0
+  SDa=1.0 
   H_P = 0.12
   H_O = 0.88
   start = theta_oak
