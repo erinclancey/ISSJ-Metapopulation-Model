@@ -86,7 +86,7 @@ process <- function(eta, theta_oak, theta_pine, gamma, SDe, SDs, m){
     
     Z_pine_m <- rbind(Z_pine_m, Zoff_pine_m)
     Z_pine_f <- rbind(Z_pine_f, Zoff_pine_f)
-     
+    
     #### Mate and make offspring in Oak
     Pairs_oak <- data.frame(FemBV = rep(NA, n_oak), FemZ = rep(NA,n_oak) , MalBV = rep(NA, n_oak), MalZ = rep(NA,n_oak))
     for (i in 1:n_oak){ # K pairs breed in oak
@@ -241,8 +241,6 @@ end_time <- Sys.time()
 end_time - start_time
 
 #write.csv(deltazbar, file="M_F_deltazbar.csv")
-
-####Make Plots for Figure 5
 deltazbar <- read.csv(file="M_F_deltazbar.csv", header=TRUE)
 
 mean(deltazbar$delta_M)
@@ -252,25 +250,21 @@ MOE_F <- sd(deltazbar$delta_F)*1.96
 
 M_plot <- ggplot(deltazbar, aes(x=delta_M, color=delta_M, fill=delta_M))+
   scale_x_continuous(limits = c(-0.5,2))+
-  geom_histogram(aes(y=..density..), color="grey30",fill="grey30",alpha=0.5, bins=30)+
+  geom_histogram(aes(y=after_stat(density)), color="grey30",fill="grey30",alpha=0.5, bins=30)+
   geom_density(alpha=0.2, color="grey30", fill="grey30", adjust=1.5)+
   labs(title="Male Divergence",x=TeX("$\\delta_{\\bar{z}_M}$"), y = "Density")+theme_minimal()+
-  geom_vline(xintercept=0.794, color="blue", size=1, linetype=1)+
-geom_vline(xintercept=mean(deltazbar$delta_M), color="black", size=1, linetype=2)+
-  #theme(axis.title.x=element_text(size=18))+
+  geom_vline(xintercept=0.794, color="blue", linewidth=1, linetype=1)+
+  geom_vline(xintercept=mean(deltazbar$delta_M), color="black", linewidth=1, linetype=2)+
   geom_segment(aes(x=mean(deltazbar$delta_M)-MOE_M,xend=mean(deltazbar$delta_M)+MOE_M),y=0,yend=0,color="black",size=2,lineend="round")
-plot(M_plot)
 
 F_plot <- ggplot(deltazbar, aes(x=delta_F, color=delta_F, fill=delta_F))+
   scale_x_continuous(limits = c(-0.5,2))+
-  geom_histogram(aes(y=..density..), color="grey60",fill="grey60",alpha=0.5, bins=30)+
+  geom_histogram(aes(y=after_stat(density)), color="grey60",fill="grey60",alpha=0.5, bins=30)+
   geom_density(alpha=0.2, color="grey60", fill="grey60", adjust=1.5)+
   labs(title="Female Divergence",x=TeX("$\\delta_{\\bar{z}_F}$"), y = "Density")+theme_minimal()+
-  geom_vline(xintercept=0.797, color="blue", size=1, linetype=1)+
-  geom_vline(xintercept=mean(deltazbar$delta_F), color="black", size=1, linetype=2)+
-  #theme(axis.title.x=element_text(size=18))+
-geom_segment(aes(x=mean(deltazbar$delta_F)-MOE_F,xend=mean(deltazbar$delta_F)+MOE_F),y=0,yend=0,color="black",size=2,lineend="round")
+  geom_vline(xintercept=0.797, color="blue", linewidth=1, linetype=1)+
+  geom_vline(xintercept=mean(deltazbar$delta_F), color="black", linewidth=1, linetype=2)+
+  geom_segment(aes(x=mean(deltazbar$delta_F)-MOE_F,xend=mean(deltazbar$delta_F)+MOE_F),y=0,yend=0,color="black",size=2,lineend="round")
 
 plot <- plot_grid(M_plot, F_plot, ncol = 1, nrow = 2, rel_heights=c(1,1))
 plot(plot)
-
