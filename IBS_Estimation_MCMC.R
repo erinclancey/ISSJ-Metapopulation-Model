@@ -58,10 +58,10 @@ process <- function(eta, theta_oak, theta_pine, gamma, SDe, SDs, m){
     Zbar_pine_F[r] <- mean(Z_pine_f[,2])
     Zbar_oak_M[r] <- mean(Z_oak_m[,2])
     Zbar_oak_F[r] <- mean(Z_oak_f[,2])
-    SDp_pine_M[r]<-sd(Z_pine_m[,2])
-    SDp_pine_F[r]<-sd(Z_pine_f[,2])
-    SDp_oak_M[r]<-sd(Z_oak_m[,2])
-    SDp_oak_F[r]<-sd(Z_oak_f[,2])
+    SDp_pine_M[r] <- sd(Z_pine_m[,2])
+    SDp_pine_F[r] <- sd(Z_pine_f[,2])
+    SDp_oak_M[r] <- sd(Z_oak_m[,2])
+    SDp_oak_F[r] <- sd(Z_oak_f[,2])
     
     #### Mate and make offspring in Pine
     Pairs_pine <- data.frame(FemBV = rep(NA, n_pine), FemZ = rep(NA,n_pine) , MalBV = rep(NA, n_pine), MalZ = rep(NA,n_pine))
