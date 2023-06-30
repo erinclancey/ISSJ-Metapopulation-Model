@@ -3,6 +3,14 @@ library(cowplot)
 library(grid)
 library(gridExtra)
 library(latex2exp)
+library(foreach)
+library(iterators)
+library(parallel)
+library(rngtools)
+library(doParallel)
+library(doRNG)
+registerDoParallel()
+registerDoRNG(2488820)
 
 posterior <- read.csv("Joint Posterior Distribution.csv", header=TRUE)
 rows <- posterior[sample(nrow(posterior), 375), ]
@@ -219,14 +227,6 @@ process <- function(eta, theta_oak, theta_pine, gamma, SDe, SDs, m){
   
 }
 
-library(foreach)
-library(iterators)
-library(parallel)
-library(rngtools)
-library(doParallel)
-library(doRNG)
-registerDoParallel()
-registerDoRNG(2488820)
 start_time <- Sys.time()
 foreach(i=1:nrow(rows), .combine=rbind) %dopar%
   {library(vecsets)
