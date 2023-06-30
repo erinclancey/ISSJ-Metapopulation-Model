@@ -223,8 +223,7 @@ process <- function(eta, theta_oak, theta_pine, gamma, SDe, SDs, m){
   
   delta_M <- Zbar_pine_M[r]-Zbar_oak_M[r]
   delta_F <- Zbar_pine_F[r]-Zbar_oak_F[r]
-  return(data.frame(delta_M, delta_F))
-  
+  return(data.frame(delta_M, delta_F))  
 }
 
 start_time <- Sys.time()
