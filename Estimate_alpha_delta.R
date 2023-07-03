@@ -31,16 +31,6 @@ fOak <- fOak[!fOak$ID %in% ID_f, ]
 mOak <- mOak[!mOak$ID %in% ID_m, ]
 
 ##### Prepare the list of phenotypes by subpopulation 
-xs = fPine$Ave_Nares_mm
-ys = mPine$Ave_Nares_mm
-xp = Pine_Pairs$femalenares
-yp = Pine_Pairs$malenares
-# 
-xs = fOak$Ave_Nares_mm
-ys = mOak$Ave_Nares_mm
-xp = Oak_Pairs$femalenares
-yp = Oak_Pairs$malenares
-
 Jaydata <- vector(mode = "list", length = 2)
 Jaydata[[1]] <- list(xs = fPine$Ave_Nares_mm,
                      ys = mPine$Ave_Nares_mm,
