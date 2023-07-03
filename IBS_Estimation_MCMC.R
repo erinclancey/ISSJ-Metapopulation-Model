@@ -170,7 +170,7 @@ process <- function(eta, theta_oak, theta_pine, gamma, SDe, SDs, m){
     Z_oak_f <- Z_oak_f[exp(-gamma*(Z_oak_f[,2] - theta_oak)^2) > runif(length(Z_oak_f[,2]), 0, 1),]
     Z_oak_m <- Z_oak_m[exp(-gamma*(Z_oak_m[,2] - theta_oak)^2) > runif(length(Z_oak_m[,2]), 0, 1),]
     
-    ## Densitydependent mortality
+    ## Density-dependent mortality
     if (length(Z_oak_f[,2]) > N_O/2){
       Z_oak_f <- Z_oak_f[sample(nrow(Z_oak_f), N_O/2, replace=FALSE),]
     }
