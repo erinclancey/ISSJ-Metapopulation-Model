@@ -69,7 +69,7 @@ chi_lower <- qchisq(0.975,df=(211+175+92+79 - 4))
 low <- (211+175+92+79 - 4)*1.3/chi_lower
 high <- (211+175+92+79 - 4)*1.3/chi_upper
 
-# Plot the male and female distributions in each habitat
+# Plot the male and female distributions in each habitat for Figure 1
 oak_plot <- ggplot(Oak, aes(x=Ave_Nares_mm, color=Sex, fill=Sex))+ ylim(0,0.5)+
   scale_x_continuous(limits = c(19, 30), breaks = seq(19,30))+
   geom_histogram(aes(y=..density..), position="identity", alpha=0.5, bins=30)+
