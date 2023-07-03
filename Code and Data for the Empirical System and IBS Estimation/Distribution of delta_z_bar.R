@@ -15,8 +15,7 @@ registerDoRNG(2488820)
 posterior <- read.csv("Joint Posterior Distribution.csv", header=TRUE)
 rows <- posterior[sample(nrow(posterior), 375), ]
 
-# Simulate the life cycle, make simulated data and calculate means and SD's
-# Additive genetic variance, environmental variance, and segregational variance are handled as standard deviations in the code below as SDa, SDe, and SDs, repsectively.
+# Simulate the life cycle
 process <- function(eta, theta_oak, theta_pine, gamma, SDe, SDs, m){
   N_P = 216
   N_O = 1587
