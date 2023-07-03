@@ -15,6 +15,8 @@ registerDoRNG(2488820)
 posterior <- read.csv("Joint Posterior Distribution.csv", header=TRUE)
 rows <- posterior[sample(nrow(posterior), 375), ]
 
+# Simulate the life cycle, make simulated data and calculate means and SD's
+# Additive genetic variance, environmental variance, and segregational variance are handled as standard deviations in the code below as SDa, SDe, and SDs, repsectively.
 process <- function(eta, theta_oak, theta_pine, gamma, SDe, SDs, m){
   N_P = 216
   N_O = 1587
@@ -27,12 +29,12 @@ process <- function(eta, theta_oak, theta_pine, gamma, SDe, SDs, m){
   H_P = 0.12
   H_O = 0.88
   start = theta_oak
-  
+
+   # Breeding Values (BV) and Phenotypic Trait Values (Z) at generation zero
   BV_pine_f <- rnorm(N_P/2, mean = start, sd = SDa)
   BV_pine_m <- rnorm(N_P/2, mean = start, sd = SDa)
   BV_oak_f <- rnorm(N_O/2, mean = start, sd = SDa)
   BV_oak_m <- rnorm(N_O/2, mean = start, sd = SDa)
-  
   Z_pine_f <- as.matrix(cbind(BV_pine_f, rnorm(N_P/2, mean = BV_pine_f-sex, sd = SDe)))
   colnames(Z_pine_f) = NULL
   Z_pine_m <- as.matrix(cbind(BV_pine_m, rnorm(N_P/2, mean = BV_pine_m+sex, sd = SDe)))
@@ -42,7 +44,7 @@ process <- function(eta, theta_oak, theta_pine, gamma, SDe, SDs, m){
   Z_oak_m <- as.matrix(cbind(BV_oak_m, rnorm(N_O/2, mean = BV_oak_m+sex, sd = SDe)))
   colnames(Z_oak_m) = NULL
   
-  R=1000
+  R=1000 # Max. number of generations
   Zbar_pine_M <- rep(NA, R)
   Zbar_pine_F <- rep(NA, R)
   Zbar_oak_M <- rep(NA, R)
@@ -154,7 +156,7 @@ process <- function(eta, theta_oak, theta_pine, gamma, SDe, SDs, m){
     Z_pine_f <- Z_pine_f[exp(-gamma*(Z_pine_f[,2] - theta_pine)^2) > runif(length(Z_pine_f[,2]), 0, 1),]
     Z_pine_m <- Z_pine_m[exp(-gamma*(Z_pine_m[,2] - theta_pine)^2) > runif(length(Z_pine_m[,2]), 0, 1),]
     
-    #### density dependent mortality
+    #### Density-dependent mortality
     
     if (length(Z_pine_f[,2]) > N_P/2){
       Z_pine_f <- Z_pine_f[sample(nrow(Z_pine_f), N_P/2, replace=FALSE),]
@@ -168,7 +170,7 @@ process <- function(eta, theta_oak, theta_pine, gamma, SDe, SDs, m){
     Z_oak_f <- Z_oak_f[exp(-gamma*(Z_oak_f[,2] - theta_oak)^2) > runif(length(Z_oak_f[,2]), 0, 1),]
     Z_oak_m <- Z_oak_m[exp(-gamma*(Z_oak_m[,2] - theta_oak)^2) > runif(length(Z_oak_m[,2]), 0, 1),]
     
-    ## density dependent mortality
+    ## Density-dependent mortality
     if (length(Z_oak_f[,2]) > N_O/2){
       Z_oak_f <- Z_oak_f[sample(nrow(Z_oak_f), N_O/2, replace=FALSE),]
     }
@@ -176,6 +178,7 @@ process <- function(eta, theta_oak, theta_pine, gamma, SDe, SDs, m){
     if (length(Z_oak_m[,2]) > N_O/2){
       Z_oak_m <- Z_oak_m[sample(nrow(Z_oak_m), N_O/2, replace=FALSE),]
     }
+    # Truncate generation time if evolutionary equilibrium is reached
     if(r>100 & abs(cor(seq(1:50),Zbar_pine_M[51:100])* sd(Zbar_pine_M[51:100])/sd(seq(1:50))) < 0.005 &
        abs(cor(seq(1:50),Zbar_pine_F[51:100])* sd(Zbar_pine_F[51:100])/sd(seq(1:50))) < 0.005 &
        abs(cor(seq(1:50),Zbar_oak_M[51:100])* sd(Zbar_oak_M[51:100])/sd(seq(1:50))) < 0.005 &
@@ -247,6 +250,7 @@ mean(deltazbar$delta_F)
 MOE_M <- sd(deltazbar$delta_M)*1.96
 MOE_F <- sd(deltazbar$delta_F)*1.96
 
+# Make plots for Figure 5
 M_plot <- ggplot(deltazbar, aes(x=delta_M, color=delta_M, fill=delta_M))+
   scale_x_continuous(limits = c(-0.5,2))+
   geom_histogram(aes(y=after_stat(density)), color="grey30",fill="grey30",alpha=0.5, bins=30)+
