@@ -16,7 +16,7 @@ Z_O_M <- subset(ISSJ_phenotypes, Habitat=="Oak" & Sex=="M")$Ave_Nares_mm
 Z_O_F <- subset(ISSJ_phenotypes, Habitat=="Oak" & Sex=="F")$Ave_Nares_mm
 
 # Simulate the life cycle, make simulated data and calculate means and SD's
-# Additive genetic variance (SDa), environmental variance (SDe), and segregational variance (SDs) are handled as standard deviations in the code below
+# Additive genetic variance, environmental variance, and segregational variance are handled as standard deviations in the code below as SDa, SDe, and SDs, repsectively.
 process <- function(eta, theta_oak, theta_pine, gamma, SDe, SDs, m){
   N_P = 216
   N_O = 1587
@@ -30,11 +30,11 @@ process <- function(eta, theta_oak, theta_pine, gamma, SDe, SDs, m){
   H_O = 0.88
   start = theta_oak
   
+  # Breeding Values (BV) and Phenotypic Trait Values (Z) at generation zero
   BV_pine_f <- rnorm(N_P/2, mean = start, sd = SDa)
   BV_pine_m <- rnorm(N_P/2, mean = start, sd = SDa)
   BV_oak_f <- rnorm(N_O/2, mean = start, sd = SDa)
   BV_oak_m <- rnorm(N_O/2, mean = start, sd = SDa)
-  
   Z_pine_f <- as.matrix(cbind(BV_pine_f, rnorm(N_P/2, mean = BV_pine_f-sex, sd = SDe)))
   colnames(Z_pine_f) = NULL
   Z_pine_m <- as.matrix(cbind(BV_pine_m, rnorm(N_P/2, mean = BV_pine_m+sex, sd = SDe)))
@@ -44,7 +44,7 @@ process <- function(eta, theta_oak, theta_pine, gamma, SDe, SDs, m){
   Z_oak_m <- as.matrix(cbind(BV_oak_m, rnorm(N_O/2, mean = BV_oak_m+sex, sd = SDe)))
   colnames(Z_oak_m) = NULL
   
-  R=1000
+  R=1000 # Max. number of generations
   Zbar_pine_M <- rep(NA, R)
   Zbar_pine_F <- rep(NA, R)
   Zbar_oak_M <- rep(NA, R)
@@ -156,7 +156,7 @@ process <- function(eta, theta_oak, theta_pine, gamma, SDe, SDs, m){
     Z_pine_f <- Z_pine_f[exp(-gamma*(Z_pine_f[,2] - theta_pine)^2) > runif(length(Z_pine_f[,2]), 0, 1),]
     Z_pine_m <- Z_pine_m[exp(-gamma*(Z_pine_m[,2] - theta_pine)^2) > runif(length(Z_pine_m[,2]), 0, 1),]
     
-    #### density dependent mortality
+    #### Density-dependent mortality
     
     if (length(Z_pine_f[,2]) > N_P/2){
       Z_pine_f <- Z_pine_f[sample(nrow(Z_pine_f), N_P/2, replace=FALSE),]
@@ -170,7 +170,7 @@ process <- function(eta, theta_oak, theta_pine, gamma, SDe, SDs, m){
     Z_oak_f <- Z_oak_f[exp(-gamma*(Z_oak_f[,2] - theta_oak)^2) > runif(length(Z_oak_f[,2]), 0, 1),]
     Z_oak_m <- Z_oak_m[exp(-gamma*(Z_oak_m[,2] - theta_oak)^2) > runif(length(Z_oak_m[,2]), 0, 1),]
     
-    ## density dependent mortality
+    ## Densitydependent mortality
     if (length(Z_oak_f[,2]) > N_O/2){
       Z_oak_f <- Z_oak_f[sample(nrow(Z_oak_f), N_O/2, replace=FALSE),]
     }
@@ -178,7 +178,7 @@ process <- function(eta, theta_oak, theta_pine, gamma, SDe, SDs, m){
     if (length(Z_oak_m[,2]) > N_O/2){
       Z_oak_m <- Z_oak_m[sample(nrow(Z_oak_m), N_O/2, replace=FALSE),]
     }
-    
+    # Truncate generation time if evolutionary equilibrium is reached
     if(r>100 & abs(cor(seq(1:50),Zbar_pine_M[51:100])* sd(Zbar_pine_M[51:100])/sd(seq(1:50))) < 0.005 &
         abs(cor(seq(1:50),Zbar_pine_F[51:100])* sd(Zbar_pine_F[51:100])/sd(seq(1:50))) < 0.005 &
         abs(cor(seq(1:50),Zbar_oak_M[51:100])* sd(Zbar_oak_M[51:100])/sd(seq(1:50))) < 0.005 &
@@ -247,8 +247,8 @@ calcLogLik <- function(eta, theta_oak, theta_pine, gamma,SDe, SDs,m, summary, Z_
   return(loglik)
 }
 
+# Function to run the Metropolis-Hastings Algorithm
 Metro_Hast <- function (eta0, theta_oak0, theta_pine0, gamma0, SDe0, SDs0, m0, iter, Z_P_M, Z_P_F, Z_O_M, Z_O_F) {
-
 eta=rep(NA, iter) 
 eta[1]=eta0
 theta_oak=rep(NA, iter)
@@ -268,6 +268,7 @@ lik[1]=calcLogLik(eta0, theta_oak0, theta_pine0, gamma0, SDe0, SDs0, m0, process
 accept=rep(NA, iter)
 accept[1]=0
 
+# Proposal distribution after pilot runs
 prop.sd <- 0.193*matrix(c(0.000206881,-0.000479629,-0.000546419,-2.28E-05,-0.00043286,-0.000323722,-1.43E-06,
                          -0.000479629,0.036124693,-0.02545953,0.000522664,-0.001943777,-0.001929837,-7.78E-05,
                          -0.000546419,-0.02545953,0.087116475,-0.001559709,0.004462354,0.004449212,-0.000214598,
